@@ -3,22 +3,27 @@ import java.util.*;
 public class SudokuGenerator { 
 	
 	public static Random rand = new Random();
+	public final static int SIZE = 4;
 	
 	public static void printSudoku(short[] sudoku) {
-		for(int i = 0; i < 9; i++) {
-			if(i > 0 && i%3 == 0) {
-				for(int j = 0; j < 11; j++)
+		for(int i = 0; i < (SIZE*SIZE); i++) {
+			if(i > 0 && i%SIZE == 0) {
+				for(int j = 0; j < (SIZE*SIZE)+SIZE-1; j++)
 					System.out.print('-');
 				System.out.println();
 			}
-			for(int j = 0; j < 9; j++) {
-				if(j > 0 && j%3 ==0)
+			for(int j = 0; j < (SIZE*SIZE); j++) {
+				if(j > 0 && j%SIZE == 0)
 					System.out.print('|');
-				short value = sudoku[i*9 + j];
-				if(value > 0)
-					System.out.print(value);
+				short value = sudoku[i*(SIZE*SIZE) + j];
+				char c;
+				if(value == 0)
+					c = ' ';
+				else if(value < 10)
+					c = (char) ('0' + value);
 				else
-					System.out.print(' ');
+					c = (char) ('a' + (value - 10));
+				System.out.print(c);
 			}
 			System.out.println();
 		}
@@ -26,11 +31,11 @@ public class SudokuGenerator {
 	
 	public static HashSet<Short> getSubGrid(int index, short[] sudoku) {
 		HashSet<Short> subGrid = new HashSet<Short>();
-		int gridRow = index / 27;
-		int gridColumn = (index % 9) / 3;
-		for(int i = 0; i < 3; i++)
-			for(int j = 0; j < 3; j++) {
-				int pos = (gridRow * 3 + i) * 9 + gridColumn * 3 + j;
+		int gridRow = index / (SIZE*SIZE*SIZE);
+		int gridColumn = (index % (SIZE*SIZE)) / SIZE;
+		for(int i = 0; i < SIZE; i++)
+			for(int j = 0; j < SIZE; j++) {
+				int pos = (gridRow * SIZE + i) * (SIZE*SIZE) + gridColumn * SIZE + j;
 				if(sudoku[pos] > 0)
 					subGrid.add(sudoku[pos]);
 			}
@@ -39,9 +44,9 @@ public class SudokuGenerator {
 	
 	public static HashSet<Short> getColumn(int index, short[] sudoku) {
 		HashSet<Short> column = new HashSet<Short>();
-		int columnIndex = index % 9;
-		for(int i = 0; i < 9; i++) {
-			int pos = i*9 + columnIndex;
+		int columnIndex = index % (SIZE*SIZE);
+		for(int i = 0; i < (SIZE*SIZE); i++) {
+			int pos = i*(SIZE*SIZE) + columnIndex;
 			if(sudoku[pos] > 0)
 				column.add(sudoku[pos]);
 		}
@@ -50,9 +55,9 @@ public class SudokuGenerator {
 	
 	public static HashSet<Short> getRow(int index, short[] sudoku) {
 		HashSet<Short> row = new HashSet<Short>();
-		int rowIndex = index / 9;
-		for(int i = 0; i < 9; i++) {
-			int pos = rowIndex * 9 + i;
+		int rowIndex = index / (SIZE*SIZE);
+		for(int i = 0; i < (SIZE*SIZE); i++) {
+			int pos = rowIndex * (SIZE*SIZE) + i;
 			if(sudoku[pos] > 0)
 				row.add(sudoku[pos]);
 		}
@@ -60,10 +65,10 @@ public class SudokuGenerator {
 	}
 	
 	public static ArrayList<Short> getOptions(int index, short[] sudoku) {
-		if(index >= 81)
+		if(index >= (SIZE*SIZE*SIZE*SIZE))
 			return new ArrayList<>();
 		ArrayList<Short> options = new ArrayList<Short>();
-		for(int i = 1; i <= 9; i++)
+		for(int i = 1; i <= (SIZE*SIZE); i++)
 			options.add((short) i);
 		for(short s : getRow(index, sudoku))
 			options.remove(new Short(s));
@@ -75,10 +80,10 @@ public class SudokuGenerator {
 	}
 	
 	public static short[] generateSudoku() {
-		short[] sudoku = new short[81];
+		short[] sudoku = new short[(SIZE*SIZE*SIZE*SIZE)];
 		LinkedList<ArrayList<Short>> stack = new LinkedList<ArrayList<Short>>();
 		ArrayList<Short> options = getOptions(stack.size(), sudoku);
-		while(stack.size() < 81) {
+		while(stack.size() < (SIZE*SIZE*SIZE*SIZE)) {
 			if(options.size() > 0) {
 				//if we have options choose one randomly
 				short choice = options.remove(rand.nextInt(options.size()));
